@@ -189,6 +189,10 @@ void calculate_SCARA_forward_Transform(float f_scara[3]);
 void prepare_move();
 void kill();
 void Stop();
+void power_off();
+#if defined(PS_ON_PIN) && PS_ON_PIN > -1
+void power_on();
+#endif
 
 bool IsStopped();
 

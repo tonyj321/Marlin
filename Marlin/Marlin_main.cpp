@@ -2628,47 +2628,13 @@ Sigma_Exit:
 
     #if defined(PS_ON_PIN) && PS_ON_PIN > -1
       case 80: // M80 - Turn on Power Supply
-        SET_OUTPUT(PS_ON_PIN); //GND
-        WRITE(PS_ON_PIN, PS_ON_AWAKE);
-
-        // If you have a switch on suicide pin, this is useful
-        // if you want to start another print with suicide feature after
-        // a print without suicide...
-        #if defined SUICIDE_PIN && SUICIDE_PIN > -1
-            SET_OUTPUT(SUICIDE_PIN);
-            WRITE(SUICIDE_PIN, HIGH);
-        #endif
-
-        #ifdef ULTIPANEL
-          powersupply = true;
-          LCD_MESSAGEPGM(WELCOME_MSG);
-          lcd_update();
-        #endif
-        break;
-      #endif
+         power_on();
+         break;
+    #endif
 
       case 81: // M81 - Turn off Power Supply
-        disable_heater();
-        st_synchronize();
-        disable_e0();
-        disable_e1();
-        disable_e2();
-        finishAndDisableSteppers();
-        fanSpeed = 0;
-        delay(1000); // Wait a little before to switch off
-      #if defined(SUICIDE_PIN) && SUICIDE_PIN > -1
-        st_synchronize();
-        suicide();
-      #elif defined(PS_ON_PIN) && PS_ON_PIN > -1
-        SET_OUTPUT(PS_ON_PIN);
-        WRITE(PS_ON_PIN, PS_ON_ASLEEP);
-      #endif
-      #ifdef ULTIPANEL
-        powersupply = false;
-        LCD_MESSAGEPGM(MACHINE_NAME" "MSG_OFF".");
-        lcd_update();
-      #endif
-	  break;
+         power_off(); 
+	       break;
 
     case 82:
       axis_relative_modes[3] = false;
@@ -4333,6 +4299,52 @@ void handle_status_leds(void) {
 }
 #endif
 
+#if defined(PS_ON_PIN) && PS_ON_PIN > -1
+void power_on() 
+{
+        SET_OUTPUT(PS_ON_PIN); //GND
+        WRITE(PS_ON_PIN, PS_ON_AWAKE);
+
+        // If you have a switch on suicide pin, this is useful
+        // if you want to start another print with suicide feature after
+        // a print without suicide...
+        #if defined SUICIDE_PIN && SUICIDE_PIN > -1
+            SET_OUTPUT(SUICIDE_PIN);
+            WRITE(SUICIDE_PIN, HIGH);
+        #endif
+
+        #ifdef ULTIPANEL
+          powersupply = true;
+          LCD_MESSAGEPGM(WELCOME_MSG);
+          lcd_update();
+        #endif
+}
+#endif 
+
+void power_off()
+{
+        disable_heater();
+        st_synchronize();
+        disable_e0();
+        disable_e1();
+        disable_e2();
+        finishAndDisableSteppers();
+        fanSpeed = 0;
+        delay(1000); // Wait a little before to switch off
+      #if defined(SUICIDE_PIN) && SUICIDE_PIN > -1
+        st_synchronize();
+        suicide();
+      #elif defined(PS_ON_PIN) && PS_ON_PIN > -1
+        SET_OUTPUT(PS_ON_PIN);
+        WRITE(PS_ON_PIN, PS_ON_ASLEEP);
+      #endif
+      #ifdef ULTIPANEL
+        powersupply = false;
+        LCD_MESSAGEPGM(MACHINE_NAME" "MSG_OFF".");
+        lcd_update();
+      #endif  
+}
+
 void manage_inactivity(bool ignore_stepper_queue/*=false*/) //default argument set in Marlin.h
 {
 	
@@ -4352,7 +4364,7 @@ void manage_inactivity(bool ignore_stepper_queue/*=false*/) //default argument s
 
   if( (millis() - previous_millis_cmd) >  max_inactive_time )
     if(max_inactive_time)
-      kill();
+      power_off();
   if(stepper_inactive_time)  {
     if( (millis() - previous_millis_cmd) >  stepper_inactive_time )
     {
