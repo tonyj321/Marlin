@@ -73,6 +73,8 @@ extern float current_temperature_bed;
 #ifdef BABYSTEPPING
   extern volatile int babystepsTodo[3];
 #endif
+
+extern bool disable_heated_bed;
   
 //high level conversion routines, for use outside of temperature.cpp
 //inline so that there is no performance decrease.
@@ -109,7 +111,7 @@ FORCE_INLINE void setTargetHotend(const float &celsius, uint8_t extruder) {
 };
 
 FORCE_INLINE void setTargetBed(const float &celsius) {  
-  target_temperature_bed = celsius;
+  if (!disable_heated_bed) target_temperature_bed = celsius;
 };
 
 FORCE_INLINE bool isHeatingHotend(uint8_t extruder){  

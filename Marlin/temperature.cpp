@@ -78,6 +78,9 @@ unsigned char soft_pwm_bed;
 #ifdef FILAMENT_SENSOR
   int current_raw_filwidth = 0;  //Holds measured filament diameter - one extruder only
 #endif  
+
+bool disable_heated_bed = true;
+
 //===========================================================================
 //=============================private variables============================
 //===========================================================================
